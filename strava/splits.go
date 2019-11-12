@@ -6,4 +6,11 @@ type Split struct {
 	ElevationDifference float64 `json:"elevation_difference"`
 	MovingTime          int     `json:"moving_time"`
 	Split               int     `json:"split"`
+	AvgHr               float64 `json:"average_heartrate"`
+	AvgSpeed            float64 `json:"average_speed"`
+	IsRace              bool    `json:"is_race"`
+	Temperature         int     `json:"temperature"`
+	WindSpeed           int     `json:"wind_speed"`
+	Humidity            int     `json:"humidity"`
+	Invalid             bool    `json:"invalid"`
 }

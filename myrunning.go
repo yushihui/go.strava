@@ -53,8 +53,8 @@ func main() {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 
-	token := "913777566600c2a7773b8449154c2138838cff1e"
-	getActivity(token, w)
+	token := "f1af2f844c53b90af1f728897e73c9842dca834b"
+	getActivitySummary(token, w)
 	// you should make this a template in your real application
 	// fmt.Fprintf(w, `<a href="%s">`, authenticator.AuthorizationURL(strava.Permissions.ReadAll, true))
 	// fmt.Fprint(w, `<img src="http://1n4rcn88bk4ziht713dla5ub-wpengine.netdna-ssl.com/wp-content/uploads/2017/12/press-thumbnail-asset-logo-02.jpg" />`)
@@ -99,8 +99,22 @@ func getActivity(accessToken string, w http.ResponseWriter) {
 
 		fmt.Fprintf(w, "activity: %s\n", activity.Name)
 
-		for _, split := range activity.SplitsMetric {
+		for _, split := range activity.SplitsStandard {
 			fmt.Fprintf(w, "split %d : %f\n", split.Split, split.Distance)
+		}
+	}
+
+}
+
+func getActivitySummary(accessToken string, w http.ResponseWriter) {
+	client := strava.NewClient(accessToken)
+	activities, err := strava.NewCurrentAthleteService(client).ListActivities().Page(1).PerPage(200).Do()
+	if err != nil {
+		fmt.Fprintln(w, "get activity failed")
+
+	} else {
+		for _, activity := range activities {
+			fmt.Fprintf(w, "Activity %s : %s\n", activity.StartDate.Format("2006-01-02"), activity.Name)
 		}
 	}
 
