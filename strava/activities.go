@@ -8,13 +8,13 @@ import (
 
 type ActivityDetailed struct {
 	ActivitySummary
-	Calories       float64                 `json:"calories"`
-	Description    string                  `json:"description"`
-	Gear           GearSummary             `json:"gear"`
-	SegmentEfforts []*SegmentEffortSummary `json:"segment_efforts"`
-	SplitsMetric   []*Split                `json:"splits_metric"`
-	SplitsStandard []*Split                `json:"splits_standard"`
-	BestEfforts    []*BestEffort           `json:"best_efforts"`
+	Calories       float64       `json:"calories"`
+	Description    string        `json:"description"`
+	Gear           GearSummary   `json:"gear"`
+	SplitsStandard []*Split      `json:"splits_standard"`
+	BestEfforts    []*BestEffort `json:"best_efforts"`
+	// SegmentEfforts []*SegmentEffortSummary `json:"segment_efforts"`
+	// SplitsMetric   []*Split                `json:"splits_metric"`
 }
 
 type ActivitySummary struct {

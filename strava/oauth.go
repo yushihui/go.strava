@@ -31,18 +31,21 @@ var Permissions = struct {
 	ViewPrivate      Permission
 	Write            Permission
 	WriteViewPrivate Permission
+	ReadAll          Permission
 }{
 	"public",
 	"view_private",
 	"write",
 	"write,view_private",
+	"activity:read_all,read_all",
 }
 
 // AuthorizationResponse is returned as a result of the token exchange
 type AuthorizationResponse struct {
-	AccessToken string          `json:"access_token"`
-	State       string          `json:"State"`
-	Athlete     AthleteDetailed `json:"athlete"`
+	AccessToken  string          `json:"access_token"`
+	State        string          `json:"State"`
+	Athlete      AthleteDetailed `json:"athlete"`
+	RefrashToken string          `json:"refresh_token"`
 }
 
 // CallbackPath returns the path portion of the CallbackURL.
@@ -152,13 +155,10 @@ func (auth OAuthAuthenticator) HandlerFunc(
 }
 
 // AuthorizationURL constructs the url a user should use to authorize this specific application.
-func (auth OAuthAuthenticator) AuthorizationURL(state string, scope Permission, force bool) string {
-	path := fmt.Sprintf("%s/oauth/authorize?client_id=%d&response_type=code&redirect_uri=%s&scope=%v", basePath, ClientId, auth.CallbackURL, scope)
-
-	if state != "" {
-		path += "&state=" + state
-	}
-
+func (auth OAuthAuthenticator) AuthorizationURL(scope Permission, force bool) string {
+	path := fmt.Sprintf("http://www.strava.com/oauth/authorize?client_id=%d&response_type=code&redirect_uri=%s&scope=%v",
+		ClientId, auth.CallbackURL, scope)
+	fmt.Printf(path)
 	if force {
 		path += "&approval_prompt=force"
 	}
