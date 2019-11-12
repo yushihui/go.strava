@@ -3,13 +3,14 @@ package strava
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 )
 
 type ActivityDetailed struct {
 	ActivitySummary
 	Calories       float64       `json:"calories"`
-	Description    string        `json:"description"`
 	Gear           GearSummary   `json:"gear"`
 	SplitsStandard []*Split      `json:"splits_standard"`
 	BestEfforts    []*BestEffort `json:"best_efforts"`
@@ -20,6 +21,7 @@ type ActivityDetailed struct {
 type ActivitySummary struct {
 	Id                   int64        `json:"id"`
 	Name                 string       `json:"name"`
+	Description          string       `json:"description"`
 	Distance             float64      `json:"distance"`
 	DistanceMile         float64      `json:"distance_mile"`
 	MovingTime           int          `json:"moving_time"`
@@ -47,7 +49,6 @@ type ActivitySummary struct {
 	Temperature          int          `json:"temperature"`
 	WindSpeed            int          `json:"wind_speed"`
 	Humidity             int          `json:"humidity"`
-	Description          int          `json:"description"`
 }
 
 type BestEffort struct {
@@ -116,6 +117,31 @@ type ActivitiesGetCall struct {
 	ops     map[string]interface{}
 }
 
+// parser temprature & humidity & wind speed, for example
+// "description": "Overcast, 51°F, Feels like 51°F, Humidity 91%, Wind 4mph from N - by Klimat.app",
+func (activitySummary *ActivitySummary) ParseTHW() {
+	if len(activitySummary.Description) > 0 {
+		metrics := strings.SplitN(activitySummary.Description, ",", -1)
+
+		temperature, err := strconv.Atoi(metrics[1][1 : len(metrics[1])-3])
+		if err == nil {
+			activitySummary.Temperature = temperature
+		}
+
+		wind_metrics := strings.SplitN(metrics[4], " ", -1)
+		windSpeed, err := strconv.Atoi(wind_metrics[2][:len(wind_metrics[2])-3])
+		if err == nil {
+			activitySummary.WindSpeed = windSpeed
+		}
+
+		humidity_metrics := strings.SplitN(metrics[3], " ", -1)
+		humidity, err := strconv.Atoi(humidity_metrics[2][:len(humidity_metrics[2])-1])
+		if err == nil {
+			activitySummary.Humidity = humidity
+		}
+
+	}
+}
 func (s *ActivitiesService) Get(activityId int64) *ActivitiesGetCall {
 	return &ActivitiesGetCall{
 		service: s,

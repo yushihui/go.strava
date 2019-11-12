@@ -14,8 +14,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	strava "github.com/yushihui/go.strava/strava"
 )
@@ -25,7 +27,6 @@ const port = 8080
 var authenticator *strava.OAuthAuthenticator
 
 func main() {
-
 	strava.ClientId = 36533
 	strava.ClientSecret = "5be099c9d101dc124ce545e4d9d3aad15c5aafa9"
 
@@ -53,7 +54,7 @@ func main() {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 
-	token := "f1af2f844c53b90af1f728897e73c9842dca834b"
+	token := "18feede74b77132b29b5e7dd080f9eba022f3112"
 	getActivitySummary(token, w)
 	// you should make this a template in your real application
 	// fmt.Fprintf(w, `<a href="%s">`, authenticator.AuthorizationURL(strava.Permissions.ReadAll, true))
@@ -89,33 +90,62 @@ func oAuthFailure(err error, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getActivity(accessToken string, w http.ResponseWriter) {
+func getActivityDetail(accessToken string, activity *strava.ActivitySummary) ([]*strava.Split, error) {
 	client := strava.NewClient(accessToken)
-	activity, err := strava.NewActivitiesService(client).Get(2782580752).IncludeAllEfforts().Do()
+	activityDetail, err := strava.NewActivitiesService(client).Get(2782580752).IncludeAllEfforts().Do()
 	if err != nil {
-		fmt.Fprintln(w, "get activity failed")
-
+		return nil, err
 	} else {
-
-		fmt.Fprintf(w, "activity: %s\n", activity.Name)
-
-		for _, split := range activity.SplitsStandard {
-			fmt.Fprintf(w, "split %d : %f\n", split.Split, split.Distance)
+		activity.Description = activityDetail.Description
+		activity.ParseTHW()
+		//var splits = make([]strava.Split, 30)
+		for _, split := range activityDetail.SplitsStandard {
+			split.Temperature = activity.Temperature
+			split.Humidity = activity.Humidity
+			split.WindSpeed = activity.WindSpeed
+			split.StartDate = activity.StartDate
+			split.ActivityId = activity.Id
+			//splits=append(splits,*split)
 		}
+		return activityDetail.SplitsStandard, nil
 	}
 
 }
 
 func getActivitySummary(accessToken string, w http.ResponseWriter) {
 	client := strava.NewClient(accessToken)
+	start := time.Now()
 	activities, err := strava.NewCurrentAthleteService(client).ListActivities().Page(1).PerPage(200).Do()
+	var splits []*strava.Split
 	if err != nil {
 		fmt.Fprintln(w, "get activity failed")
 
 	} else {
 		for _, activity := range activities {
-			fmt.Fprintf(w, "Activity %s : %s\n", activity.StartDate.Format("2006-01-02"), activity.Name)
+			activity_splits, err := getActivityDetail(accessToken, activity)
+			if err == nil {
+				splits = append(splits, activity_splits...)
+			}
 		}
+	}
+
+	write2File(activities, fmt.Sprintf("result/%d/activities.json", strava.ClientId))
+	write2File(splits, fmt.Sprintf("result/%d/splits.json", strava.ClientId))
+	elapsed := time.Since(start)
+	log.Printf("get activity took %s", elapsed)
+}
+
+func write2File(activities interface{}, fileName string) {
+	log.Println("write to file - " + fileName)
+	content, _ := json.Marshal(activities)
+	f, err := os.OpenFile(fileName,
+		os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+	if _, err := f.Write(content); err != nil {
+		log.Println(err)
 	}
 
 }

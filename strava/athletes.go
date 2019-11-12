@@ -382,7 +382,7 @@ func (c *AthletesListActivitiesCall) PerPage(perPage int) *AthletesListActivitie
 }
 
 func (c *AthletesListActivitiesCall) Do() ([]*ActivitySummary, error) {
-	data, err := c.service.client.run("GET", fmt.Sprintf("/athletes/%d/activities", c.id), c.ops)
+	data, err := c.service.client.run("GET", fmt.Sprintf("/athlete/activities"), c.ops)
 	if err != nil {
 		return nil, err
 	}
