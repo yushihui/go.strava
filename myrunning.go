@@ -115,7 +115,7 @@ func getActivityDetail(accessToken string, activity *strava.ActivitySummary) ([]
 func getActivitySummary(accessToken string, w http.ResponseWriter) {
 	client := strava.NewClient(accessToken)
 	start := time.Now()
-	activities, err := strava.NewCurrentAthleteService(client).ListActivities().Page(1).PerPage(200).Do()
+	activities, err := strava.NewCurrentAthleteService(client).ListActivities().Page(3).PerPage(200).Do()
 	var splits []*strava.Split
 	if err != nil {
 		fmt.Fprintln(w, "get activity failed")
