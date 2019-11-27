@@ -495,3 +495,5 @@ be familiar with raw JSON responses, so see the [Documentation](http://strava.gi
 	clubs[0].Id == 1
 
 This will return the club provided when creating the client even though you actually wanted club 1000.
+
+## This is going to be used by another repo
