@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/strava/go.strava"
+	strava "github.com/yushihui/go.strava/strava"
 )
 
 const port = 8080 // port of local demo server
@@ -29,8 +29,9 @@ func main() {
 	// setup the credentials for your app
 	// These need to be set to reflect your application
 	// and can be found at https://www.strava.com/settings/api
-	flag.IntVar(&strava.ClientId, "id", 0, "Strava Client ID")
-	flag.StringVar(&strava.ClientSecret, "secret", "", "Strava Client Secret")
+	flag.IntVar(&strava.ClientId, "id", 36533, "Strava Client ID")
+
+	flag.StringVar(&strava.ClientSecret, "secret", "5be099c9d101dc124ce545e4d9d3aad15c5aafa9", "Strava Client Secret")
 
 	flag.Parse()
 
@@ -71,7 +72,7 @@ func main() {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// you should make this a template in your real application
-	fmt.Fprintf(w, `<a href="%s">`, authenticator.AuthorizationURL("state1", strava.Permissions.Public, true))
+	fmt.Fprintf(w, `<a href="%s">`, authenticator.AuthorizationURL(strava.Permissions.ReadAll, true))
 	fmt.Fprint(w, `<img src="http://strava.github.io/api/images/ConnectWithStrava.png" />`)
 	fmt.Fprint(w, `</a>`)
 }
